@@ -10,7 +10,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const API_KEY: string | undefined= process.env.API_KEY; 
-
+console.log(API_KEY);
 const model = new ChatOpenAI({
   model: "gpt-3.5-turbo",
   temperature: 0,

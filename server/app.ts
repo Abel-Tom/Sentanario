@@ -7,7 +7,7 @@ dotenv.config();
 
 
 const app: Express = express();
-const port: number = Number(process.env.PORT) ?? '5000';
+const port: number = 8000;
 const node_env: string | undefined = process.env.NODE_ENV;
 
 
