@@ -3,9 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "npx tsc",
-    "start": "node app.js",
-    "dev": "nodemon app.ts"
+    "build": "tsc",
+    "start": "nodemon",
+    "dev": "nodemon index.ts"
   },
   
   "dependencies": {
