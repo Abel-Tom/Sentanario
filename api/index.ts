@@ -1,6 +1,8 @@
 import express, { Express, Request, Response } from 'express';
+import cors from 'cors';
 
 import getReply from '../utils/utils';
+
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -12,6 +14,7 @@ const node_env: string | undefined = process.env.NODE_ENV;
 
 
 app.use(express.json()); 
+app.use(cors());
 
 app.get('/', (req: Request,res:Response) => {
     res.send('Hello from TypeScript and Express!');
