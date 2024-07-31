@@ -17,7 +17,7 @@ app.use(express.json());
 app.use(cors());
 
 app.get('/', (req: Request,res:Response) => {
-    res.send('Hello from TypeScript and Express!');
+    res.send('Hello from TypeScript and Express! also changed');
 });
 
 app.post('/reply', async (req: Request, res: Response) => {
