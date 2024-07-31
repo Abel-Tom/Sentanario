@@ -5,7 +5,7 @@
   "scripts": {
     "build": "tsc",
     "start": "nodemon",
-    "dev": "nodemon index.ts"
+    "dev": "nodemon api/index.ts"
   },
   
   "dependencies": {

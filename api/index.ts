@@ -1,6 +1,6 @@
 import express, { Express, Request, Response } from 'express';
 
-import getReply from './utils/utils';
+import getReply from '../utils/utils';
 import dotenv from 'dotenv';
 dotenv.config();
 
