@@ -8,6 +8,7 @@ import {
 
 import axios, { AxiosError } from "axios";
 import nodemailer from 'nodemailer';
+import { DateTime } from 'luxon';
 
 import { API_KEY, IP_GEOLATION_API_KEY, PORT, HOST, NODE_MAILER_USERNAME, PASSWORD, EMAIL } from "../contants";
 
@@ -59,6 +60,27 @@ export const getMessage = (location: any) => {
           city: ${location.city} isp: ${location.isp}`
 }
 
+export const formatMessageAndSendEmail =  async (ip: string='', userAgent: string | undefined) => {
+  const currentDate = new Date();
+  const now = DateTime.now();
+  const year = currentDate.getFullYear();
+  const monthName = currentDate.toLocaleString('default', { month: 'long' });
+  const day = currentDate.getDate();  
+  const hours = currentDate.getHours();
+  const minutes = currentDate.getMinutes();
+  const seconds = currentDate.getSeconds();  
+  const subject: string = `You have a new user on ${monthName}-${day}`
+  const message: string = `
+                          ip: ${ip} \n
+                          time: ${hours}:${minutes}:${seconds}\n
+                          timezone: ${now.zoneName}\n
+                          user-agent: ${userAgent}\n
+  `
+  sendEmail(subject, message)
+}
+
+
+
 
 
 export const sendEmail = async (subject: string, message: string) => {
@@ -88,9 +110,6 @@ export const sendEmail = async (subject: string, message: string) => {
   }
   return 'email sent'
 }
-
-// sendEmail('hello', `what's up?`);
-
 
 const model = new ChatOpenAI({
   model: "gpt-3.5-turbo",

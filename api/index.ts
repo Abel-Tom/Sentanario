@@ -2,7 +2,7 @@ import express, { Express, Request, Response } from 'express';
 import requestIp from 'request-ip';
 import cors from 'cors';
 
-import {getReply, sendEmail } from '../utils/utils';
+import {formatMessageAndSendEmail, getReply } from '../utils/utils';
 
 import dotenv from 'dotenv';
 dotenv.config();
@@ -17,9 +17,8 @@ app.use(cors());
 app.use(requestIp.mw());
 
 app.get('/', async (req: Request,res:Response) => {
-  const clientIp = req.clientIp;
-  sendEmail('You have a new visitor', clientIp || '')
-  res.send(`Greetings stranger! we are Express and TypeScript`);
+  formatMessageAndSendEmail(req.clientIp, req.headers['user-agent']);
+  res.send(`Greetings Stranger! We are Express and TypeScript`);
 });
 
 app.post('/reply', async (req: Request, res: Response) => {
