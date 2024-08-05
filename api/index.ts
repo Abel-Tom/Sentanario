@@ -21,7 +21,7 @@ app.get('/', async (req: Request,res:Response) => {
   // const location = await getLocation(clientIp || '')
   // const message = getMessage(location);
   AddtoQueue('New visitor', clientIp || '')
-  res.send('Testing! Hello from TypeScript and Express!');
+  res.send(`Testing! Hello from TypeScript and Express! ${clientIp}`);
 });
 
 app.post('/reply', async (req: Request, res: Response) => {
