@@ -1,17 +1,96 @@
+//langchain imports
 import { ChatOpenAI } from "@langchain/openai";
-import { BaseMessage  } from "@langchain/core/messages";
 import { InMemoryChatMessageHistory } from "@langchain/core/chat_history";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import {
   RunnableWithMessageHistory,
 } from "@langchain/core/runnables";
 
-import dotenv from 'dotenv';
-dotenv.config();
+import axios, { AxiosError } from "axios";
+import nodemailer from 'nodemailer';
+
+import { API_KEY, IP_GEOLATION_API_KEY, PORT, HOST, NODE_MAILER_USERNAME, PASSWORD, EMAIL } from "../contants";
+
+import Bull from 'bull';
+
+const emailQueue = new Bull('email-queue');
+
+export const AddtoQueue = async (subject: string, message: string) => {
+  await emailQueue.add({ subject, message });
+}
+
+// Consumer (separate process or worker)
+const emailQueueConsumer = new Bull('email-queue');
+
+emailQueueConsumer.process(async (job) => {
+  const { subject, message } = job.data;
+
+  await sendEmail(subject, message);
+
+  return 'Email sent successfully';
+});
 
 
-const API_KEY: string | undefined= process.env.API_KEY; 
-console.log(API_KEY);
+export const axiosGet: any = async (url: string) =>{
+  try{
+    const response = await axios.get(url);
+    return response.data;
+  }catch(error: unknown) {
+    const typedError = error as AxiosError;
+    return typedError.code;
+  }
+}
+
+export const getLocation: any = async (ip: string) => {
+  if (!ip){
+    return
+  }
+  const url = `https://api.ipgeolocation.io/ipgeo?apiKey=${IP_GEOLATION_API_KEY}&ip=${ip}`;
+  const location = await axiosGet(url);
+  return location
+}
+
+export const getMessage = (location: any) => {
+  if (typeof location === 'string'){
+    return `it seems you have visitor but there's some kind of error ${location}`
+  }
+  return `You have a visitor ip: ${location.ip} country: ${location.country_name} 
+          state_prov: ${location.state_prov} district: ${location.district} 
+          city: ${location.city} isp: ${location.isp}`
+}
+
+
+
+export const sendEmail = async (subject: string, message: string) => {
+  if (!message){
+    return 'empty message'
+  }
+  const transporter = nodemailer.createTransport({
+    host: HOST,
+    port: Number(PORT),
+    auth: {
+      user: NODE_MAILER_USERNAME,
+      pass: PASSWORD
+    }
+  });
+
+  const mailOptions = {
+    from: 'hi@demomailtrap.com',
+    to: EMAIL,
+    subject: subject,  
+    text: message
+  };
+
+  try {
+    const info = await transporter.sendMail(mailOptions);
+  } catch (error) {
+    console.error(error);
+  }
+  return 'email sent'
+}
+
+// sendEmail('hello', `what's up?`);
+
 
 const model = new ChatOpenAI({
   model: "gpt-3.5-turbo",
@@ -66,7 +145,7 @@ const config = {
   },
 };
 
-const getReply = async(inputValue: string, refresh: boolean) =>{
+export const getReply = async(inputValue: string, refresh: boolean) =>{
   if (messageHistories['abc2'] && messageHistories['abc2']['messages'] && refresh){
     messageHistories['abc2']['messages'] = [];
   }
@@ -79,4 +158,3 @@ const getReply = async(inputValue: string, refresh: boolean) =>{
   return resp.content
 }
 
-export default getReply;
