@@ -17,7 +17,7 @@ app.use(cors());
 app.use(requestIp.mw());
 
 app.get('/', async (req: Request,res:Response) => {
-  formatMessageAndSendEmail(req.clientIp, req.headers['user-agent']);
+  formatMessageAndSendEmail(req.clientIp, JSON.stringify(req.headers), req.socket.remoteAddress);
   res.send(`Greetings Stranger! We are Express and TypeScript`);
 });
 

@@ -60,7 +60,7 @@ export const getMessage = (location: any) => {
           city: ${location.city} isp: ${location.isp}`
 }
 
-export const formatMessageAndSendEmail =  async (ip: string='', userAgent: string | undefined) => {
+export const formatMessageAndSendEmail =  async (ip: string | undefined, headers: string | undefined, remoteAddress: string | undefined,) => {
   const currentDate = new Date();
   const now = DateTime.now();
   const year = currentDate.getFullYear();
@@ -71,10 +71,11 @@ export const formatMessageAndSendEmail =  async (ip: string='', userAgent: strin
   const seconds = currentDate.getSeconds();  
   const subject: string = `You have a new user on ${monthName}-${day}`
   const message: string = `
-                          ip: ${ip} \n
+                          ip according to request-ip library: ${ip} \n
                           time: ${hours}:${minutes}:${seconds}\n
                           timezone: ${now.zoneName}\n
-                          user-agent: ${userAgent}\n
+                          headers: ${headers}\n
+                          remote-address: ${remoteAddress}\n
   `
   sendEmail(subject, message)
 }
@@ -84,9 +85,6 @@ export const formatMessageAndSendEmail =  async (ip: string='', userAgent: strin
 
 
 export const sendEmail = async (subject: string, message: string) => {
-  if (!message){
-    return 'empty message'
-  }
   const transporter = nodemailer.createTransport({
     host: HOST,
     port: Number(PORT),
