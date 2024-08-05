@@ -2,7 +2,7 @@ import express, { Express, Request, Response } from 'express';
 import requestIp from 'request-ip';
 import cors from 'cors';
 
-import {getReply, getLocation, getMessage, sendEmail, AddtoQueue} from '../utils/utils';
+import {getReply, sendEmail } from '../utils/utils';
 
 import dotenv from 'dotenv';
 dotenv.config();
@@ -18,10 +18,8 @@ app.use(requestIp.mw());
 
 app.get('/', async (req: Request,res:Response) => {
   const clientIp = req.clientIp;
-  // const location = await getLocation(clientIp || '')
-  // const message = getMessage(location);
-  AddtoQueue('New visitor', clientIp || '')
-  res.send(`Testing! Hello from TypeScript and Express! ${clientIp}`);
+  sendEmail('You have a new visitor', clientIp || '')
+  res.send(`Greetings stranger! we are Express and TypeScript`);
 });
 
 app.post('/reply', async (req: Request, res: Response) => {
