@@ -20,6 +20,13 @@ app.get('/', async (req: Request,res:Response) => {
   res.status(200).json({"Greetings Stranger! ": "We are Express and TypeScript Added  some extra features"});
 });
 
+app.post('/test', async (req: Request, res: Response) => {
+  if (!req.body.message){
+    res.status(201).json({ message: 'please type your message' });
+  }
+  res.status(200).json({"Greetings Stranger! ": "This is a test post request response"});
+});
+
 app.post('/reply', async (req: Request, res: Response) => {
   if (!req.body.message){
     res.status(201).json({ message: 'please type your message' });
