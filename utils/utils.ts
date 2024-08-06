@@ -141,19 +141,6 @@ export const CheckLengthAndSendMail = async (Db: InMemDbItem[]): Promise<InMemDb
   return sendInteractionReport(Db);
 }
 
-
-export const CheckAndSendEmail = async (Db: InMemDbItem[], num: number = MAX_DB_LENGTH): Promise<InMemDbItem[]> =>{
-  if (!IsSendEmail(Db)){
-    return Db;
-  }
-  const message: string = JSON.stringify(Db);
-  sendEmail("User Interaction with Sentanario", message);
-  Db = []
-  return Db;
-}
-
-
-
 export const getDbItem = (ip: string | string[] | undefined, message: string, reply: any): InMemDbItem => {
   if (!ip){
     ip = "couldn't find ip or you are in dev environment";
