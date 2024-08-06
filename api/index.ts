@@ -17,7 +17,7 @@ app.use(requestIp.mw());
 app.get('/', async (req: Request,res:Response) => {
   
   formatMessageAndSendEmail(req.clientIp, JSON.stringify(req.headers), req.socket.remoteAddress);
-  res.status(200).json({"Greetings Stranger! ": "We are Express and TypeScript"});
+  res.status(200).json({"Greetings Stranger! ": "We are Express and TypeScript Added  some extra features"});
 });
 
 app.post('/reply', async (req: Request, res: Response) => {
