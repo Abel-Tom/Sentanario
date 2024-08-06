@@ -15,6 +15,7 @@ app.use(cors());
 app.use(requestIp.mw());
 
 app.get('/', async (req: Request,res:Response) => {
+  
   formatMessageAndSendEmail(req.clientIp, JSON.stringify(req.headers), req.socket.remoteAddress);
   res.status(200).json({"Greetings Stranger! ": "We are Express and TypeScript"});
 });
@@ -31,8 +32,14 @@ app.post('/reply', async (req: Request, res: Response) => {
 });
 
 cron.schedule(getCronExpression(), async () => {
+  console.log('started task')
   inMemDb = await CheckMinutesAndSendMail(inMemDb);
 });
+
+export const cronTask =  async (): Promise<void> => {
+  console.log('started task')
+  inMemDb = await CheckMinutesAndSendMail(inMemDb);
+};
 
 app.listen(SERVER_PORT, () => {
     console.log(`${NODE_ENV} server listening on port ${SERVER_PORT}.`);

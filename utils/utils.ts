@@ -131,14 +131,14 @@ export const CheckMinutesAndSendMail = async (Db: InMemDbItem[]): Promise<InMemD
   if (!CheckLength(Db,1) || !CheckDifferenceInMinutes(Db[0].time)){
     return Db;
   }
-  return sendInteractionReport(Db);
+  return await sendInteractionReport(Db);
 }
 
 export const CheckLengthAndSendMail = async (Db: InMemDbItem[]): Promise<InMemDbItem[]> =>{
   if (!CheckLength(Db)){
     return Db;
   }
-  return sendInteractionReport(Db);
+  return await sendInteractionReport(Db);
 }
 
 export const getDbItem = (ip: string | string[] | undefined, message: string, reply: any): InMemDbItem => {
