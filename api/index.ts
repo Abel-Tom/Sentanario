@@ -36,10 +36,10 @@ cron.schedule(getCronExpression(), async () => {
   inMemDb = await CheckMinutesAndSendMail(inMemDb);
 });
 
-// export const cronTask =  async (): Promise<void> => {
-//   console.log('started task')
-//   inMemDb = await CheckMinutesAndSendMail(inMemDb);
-// };
+export const cronTask =  async (): Promise<void> => {
+  console.log('started task')
+  inMemDb = await CheckMinutesAndSendMail(inMemDb);
+};
 
 app.listen(SERVER_PORT, () => {
     console.log(`${NODE_ENV} server listening on port ${SERVER_PORT}.`);
