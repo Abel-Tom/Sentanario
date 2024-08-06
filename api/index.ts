@@ -36,9 +36,10 @@ cron.schedule(getCronExpression(), async () => {
   inMemDb = await CheckMinutesAndSendMail(inMemDb);
 });
 
-export const cronTask =  async (): Promise<void> => {
+export const cronTask =  async (req: Request, res: Response)  => {
   console.log('started task')
   inMemDb = await CheckMinutesAndSendMail(inMemDb);
+  res.status(200).json({"Greetings Stranger! ": "We are Express and TypeScript Added  some extra features"});
 };
 
 app.listen(SERVER_PORT, () => {
