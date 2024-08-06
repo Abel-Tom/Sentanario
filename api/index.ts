@@ -1,16 +1,14 @@
 import express, { Express, Request, Response } from 'express';
 import requestIp from 'request-ip';
 import cors from 'cors';
+import cron from 'node-cron';
 
-import {formatMessageAndSendEmail, getReply } from '../utils/utils';
-
-import dotenv from 'dotenv';
-dotenv.config();
+import { CheckLengthAndSendMail, CheckMinutesAndSendMail, formatMessageAndSendEmail, getCronExpression, getDbItem, getReply } from '../utils/utils';
+import { InMemDbItem } from '../interfaces';
+import { NODE_ENV, SERVER_PORT } from '../contants';
 
 const app: Express = express();
-const port: number = 8000;
-const node_env: string | undefined = process.env.NODE_ENV;
-
+let inMemDb: InMemDbItem[] = []
 
 app.use(express.json()); 
 app.use(cors());
@@ -18,7 +16,7 @@ app.use(requestIp.mw());
 
 app.get('/', async (req: Request,res:Response) => {
   formatMessageAndSendEmail(req.clientIp, JSON.stringify(req.headers), req.socket.remoteAddress);
-  res.send(`Greetings Stranger! We are Express and TypeScript`);
+  res.status(200).json({"Greetings Stranger! ": "We are Express and TypeScript"});
 });
 
 app.post('/reply', async (req: Request, res: Response) => {
@@ -27,9 +25,15 @@ app.post('/reply', async (req: Request, res: Response) => {
   }
   const refresh: boolean = req.body.refresh?? false;
   const reply = await getReply(req.body.message,refresh);
+  inMemDb.push(getDbItem(req.headers["x-real-ip"], req.body.message, reply));
+  inMemDb = await CheckLengthAndSendMail(inMemDb);
   res.status(201).json({ message: reply });
 });
 
-app.listen(port, () => {
-    console.log(`${node_env} server listening on port ${port}`);
+cron.schedule(getCronExpression(), async () => {
+  inMemDb = await CheckMinutesAndSendMail(inMemDb);
+});
+
+app.listen(SERVER_PORT, () => {
+    console.log(`${NODE_ENV} server listening on port ${SERVER_PORT}.`);
 });

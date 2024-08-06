@@ -10,9 +10,10 @@ import axios, { AxiosError } from "axios";
 import nodemailer from 'nodemailer';
 import { DateTime } from 'luxon';
 
-import { API_KEY, IP_GEOLATION_API_KEY, PORT, HOST, NODE_MAILER_USERNAME, PASSWORD, EMAIL } from "../contants";
+import { API_KEY, IP_GEOLATION_API_KEY, PORT, HOST, NODE_MAILER_USERNAME, PASSWORD, EMAIL, UPDATE_TIME, MAX_DB_LENGTH } from "../contants";
 
 import Bull from 'bull';
+import { InMemDbItem } from "../interfaces";
 
 const emailQueue = new Bull('email-queue');
 
@@ -80,9 +81,106 @@ export const formatMessageAndSendEmail =  async (ip: string | undefined, headers
   sendEmail(subject, message)
 }
 
+export const DifferenceInMinutes = (startDate: Date, endDate: Date = new Date()): number => {
+  const differenceInMilliseconds = endDate.getTime() - startDate.getTime();
+  const differenceInMinutes = differenceInMilliseconds / (1000 * 60); 
+  return differenceInMinutes
+}
+
+export const CreateDate = (dateString: string): Date =>{
+  const parts = dateString.split(":");
+  const hours = parseInt(parts[0]);
+  const minutes = parseInt(parts[1]);
+  const date = new Date();
+  date.setHours(hours);
+  date.setMinutes(minutes);
+  date.setSeconds(0);
+  date.setMilliseconds(0);
+  return date
+}
+
+export const CheckDifferenceInMinutes = (dateString: string): Boolean =>{
+  const differenceInMinutes: number = DifferenceInMinutes(CreateDate(dateString));
+  if (differenceInMinutes>=UPDATE_TIME){
+    return true;
+  }
+  return false;
+}
+
+export const CheckLength = (Db: InMemDbItem[], num: number = MAX_DB_LENGTH): Boolean => {
+  if (Db.length>=num){
+    return true
+  }  
+  return false
+}
+
+export const IsSendEmail = (Db: InMemDbItem[], num: number = MAX_DB_LENGTH): Boolean => {
+  if (CheckLength(Db) || CheckDifferenceInMinutes(Db[0].time)){
+    return true
+  }  
+  return false
+}
+
+export const sendInteractionReport = async (Db: InMemDbItem[]): Promise<InMemDbItem[]> =>{
+  const message: string = JSON.stringify(Db);
+  sendEmail("User Interaction with Sentanario", message);
+  return [];
+}
+
+export const CheckMinutesAndSendMail = async (Db: InMemDbItem[]): Promise<InMemDbItem[]> =>{
+  if (!CheckLength(Db,1) || !CheckDifferenceInMinutes(Db[0].time)){
+    return Db;
+  }
+  return sendInteractionReport(Db);
+}
+
+export const CheckLengthAndSendMail = async (Db: InMemDbItem[]): Promise<InMemDbItem[]> =>{
+  if (!CheckLength(Db)){
+    return Db;
+  }
+  return sendInteractionReport(Db);
+}
+
+
+export const CheckAndSendEmail = async (Db: InMemDbItem[], num: number = MAX_DB_LENGTH): Promise<InMemDbItem[]> =>{
+  if (!IsSendEmail(Db)){
+    return Db;
+  }
+  const message: string = JSON.stringify(Db);
+  sendEmail("User Interaction with Sentanario", message);
+  Db = []
+  return Db;
+}
 
 
 
+export const getDbItem = (ip: string | string[] | undefined, message: string, reply: any): InMemDbItem => {
+  if (!ip){
+    ip = "couldn't find ip or you are in dev environment";
+  }
+  const currentDate = new Date();
+  const now = DateTime.now();
+  const DbItem: InMemDbItem = {
+    ip: ip,
+    message: message,
+    reply: reply,
+    time: `${currentDate.getHours()}:${currentDate.getMinutes()}`,
+    date: `${currentDate.toLocaleString('default', { month: 'long' })} ${currentDate.getDate()}`,
+    timezone: `${now.zoneName}`
+  }
+  return DbItem;
+}
+
+export const getCronExpression = (minutes: number = UPDATE_TIME): string =>{
+  if (minutes===1 || minutes===0){
+    return '* * * * *';
+  }
+  const roundedUp: number = Math.ceil(minutes/60);
+  if (roundedUp > 1 && roundedUp < 10){
+    return `0 */${roundedUp} * * *`
+  }
+  return '0 * * * *';
+}
 
 export const sendEmail = async (subject: string, message: string) => {
   const transporter = nodemailer.createTransport({
