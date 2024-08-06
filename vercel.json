@@ -3,6 +3,6 @@
     "rewrites": [{ "source": "/(.*)", "destination": "/api" }],
     "crons": [{
         "path": "/api/index",
-        "schedule": "* * * * *"
+        "schedule": "0 0 * * *"
       }]
 }
