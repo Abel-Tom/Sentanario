@@ -2,6 +2,7 @@ Sentanario is the chatbot in my portfolio site https://abel-tom.vercel.app/
 Visitors can ask Sentanario for my details instead of contacting me directly.
 
 Installation
+
 npm i
 
 constants.ts file 
