@@ -38,8 +38,8 @@ app.post('/reply', async (req: Request, res: Response) => {
   }
   const refresh: boolean = req.body.refresh?? false;
   const reply = await getReply(req.body.message,refresh);
-  inMemDb.push(getDbItem(req.headers["x-real-ip"], req.body.message, reply));
-  inMemDb = await CheckLengthAndSendMail(inMemDb);
+  // inMemDb.push(getDbItem(req.headers["x-real-ip"], req.body.message, reply));
+  // inMemDb = await CheckLengthAndSendMail(inMemDb);
   res.status(201).json({ message: reply });
 });
 
@@ -53,6 +53,6 @@ cron.schedule(getCronExpression(), async () => {
 //   inMemDb = await CheckMinutesAndSendMail(inMemDb);
 // };
 
-app.listen(SERVER_PORT, () => {
-    console.log(`${NODE_ENV} server listening on port ${SERVER_PORT}.`);
+app.listen(8000, () => {
+    console.log('server listening on port 8000');
 });
