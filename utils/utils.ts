@@ -199,16 +199,9 @@ import { ChatGroq } from "@langchain/groq";
 const model = new ChatGroq({
   model: "llama-3.3-70b-versatile",
   temperature: 0,
-  apiKey: API_KEY
+  apiKey: API_KEY,
+  streaming: true, // Enable streaming
 });
-
-// const model = new ChatOpenAI({
-//   model: "gpt-3.5-turbo",
-//   temperature: 0,
-//   apiKey: API_KEY
-// });
-  
-const messageHistories: Record<string, InMemoryChatMessageHistory> = {};
 
 const prompt = ChatPromptTemplate.fromMessages([
   [
@@ -241,36 +234,15 @@ const prompt = ChatPromptTemplate.fromMessages([
   ["human", "{input}"]
 ]);
 
-const chain = prompt.pipe(model);
+export const chain = prompt.pipe(model);
 
-const withMessageHistory = new RunnableWithMessageHistory({
-  runnable: chain,
-  getMessageHistory: async (sessionId) => {
-    if (messageHistories[sessionId] === undefined) {
-      const messageHistory = new InMemoryChatMessageHistory();
-      messageHistories[sessionId] = messageHistory;
-    }
-    return messageHistories[sessionId];
-  },
-  inputMessagesKey: "input",
-  historyMessagesKey: "chat_history",
-});
-const config = {
-  configurable: {
-    sessionId: "abc2",
-  },
-};
+export const getReply = async (inputValue: string, onData: (chunk: string) => void) => {
+  const stream = await chain.stream({
+    input: inputValue
+  });
 
-export const getReply = async(inputValue: string, refresh: boolean) =>{
-  if (messageHistories['abc2'] && messageHistories['abc2']['messages'] && refresh){
-    messageHistories['abc2']['messages'] = [];
+  for await (const chunk of stream) {
+    console.log(chunk.content); // Process each chunk of streamed data
   }
-  const resp = await withMessageHistory.invoke(
-      {
-      input: inputValue
-      },
-      config
-  );
-  return resp.content
-}
+};
 

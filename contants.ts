@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
+export const MONGODB_URI: string | undefined = process.env.MONGODB_URI;
 export const API_KEY: string | undefined= process.env.OPEN_AI_API_KEY; 
 export const IP_GEOLATION_API_KEY: string | undefined= process.env.IP_GEOLATION_API_KEY;
 export const NODE_ENV: string | undefined= process.env.NODE_ENV;
