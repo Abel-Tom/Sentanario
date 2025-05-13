@@ -89,6 +89,9 @@ app.post('/add', async (req: Request, res: Response) => {
 });
 
 app.get('/items', async (_req: Request, res: Response) => {
+  console.log('url', mongoURI);
+  console.log('db', db);
+  console.log('collection', collection);
   try {
     const items = await collection.find().toArray();
     res.json(items);
