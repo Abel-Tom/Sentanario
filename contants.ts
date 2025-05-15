@@ -1,8 +1,9 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-export const MONGODB_URI: string | undefined = process.env.MONGODB_URI;
-export const API_KEY: string | undefined= process.env.OPEN_AI_API_KEY; 
+export const UPSTASH_REDIS_REST_URL: string | undefined = process.env.UPSTASH_REDIS_REST_URL;
+export const UPSTASH_REDIS_REST_TOKEN: string | undefined = process.env.UPSTASH_REDIS_REST_TOKEN;
+export const GROQ_API_KEY: string | undefined= process.env.GROQ_API_KEY; 
 export const IP_GEOLATION_API_KEY: string | undefined= process.env.IP_GEOLATION_API_KEY;
 export const NODE_ENV: string | undefined= process.env.NODE_ENV;
 export const SERVER_PORT: number  = Number(process.env.SERVER_PORT);

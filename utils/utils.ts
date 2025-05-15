@@ -1,23 +1,21 @@
-//langchain imports
-import { InMemoryChatMessageHistory } from "@langchain/core/chat_history";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import {
   RunnableWithMessageHistory,
 } from "@langchain/core/runnables";
 
-import { API_KEY } from "../contants";
-
+import { UpstashRedisChatMessageHistory } from "@langchain/community/stores/message/upstash_redis";
+import { GROQ_API_KEY, UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN } from "../contants";
 
 import { ChatGroq } from "@langchain/groq";
 
-const model = new ChatGroq({
+export const model = new ChatGroq({
   model: "llama-3.3-70b-versatile",
   temperature: 0,
-  apiKey: API_KEY,
+  apiKey: GROQ_API_KEY,
   streaming: true, // Enable streaming
 });
 
-const prompt = ChatPromptTemplate.fromMessages([
+export const prompt = ChatPromptTemplate.fromMessages([
   [
     "system",
     `Your name is Sentanario. You are a helpful assistant. You work for Abel Thomas. Abel Thomas is a full stack developer. His expertise is in python based web frameworks
@@ -54,15 +52,20 @@ const prompt = ChatPromptTemplate.fromMessages([
   ["human", "{input}"]
 ]);
 
-export const chain = prompt.pipe(model);
+export const chain = new RunnableWithMessageHistory({
+  runnable: prompt.pipe(model),
+  getMessageHistory: (sessionId) =>
+    new UpstashRedisChatMessageHistory({
+      sessionId,
+      config: {
+        url: UPSTASH_REDIS_REST_URL,
+        token: UPSTASH_REDIS_REST_TOKEN,
+      },
+    }),
+    inputMessagesKey: "input",
+    outputMessagesKey: "output",
+});
 
-export const getReply = async (inputValue: string, onData: (chunk: string) => void) => {
-  const stream = await chain.stream({
-    input: inputValue
-  });
 
-  for await (const chunk of stream) {
-    console.log(chunk.content); // Process each chunk of streamed data
-  }
-};
+
 
