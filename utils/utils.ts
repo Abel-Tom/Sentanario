@@ -1,10 +1,7 @@
-import { ChatPromptTemplate } from "@langchain/core/prompts";
-import {
-  RunnableWithMessageHistory,
-} from "@langchain/core/runnables";
+import { GROQ_API_KEY } from "../contants";
+import { createAgent } from "langchain";
 
-import { UpstashRedisChatMessageHistory } from "@langchain/community/stores/message/upstash_redis";
-import { GROQ_API_KEY, UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN } from "../contants";
+import { emailValidationTool } from "./emailValidationTool";
 
 import { ChatGroq } from "@langchain/groq";
 
@@ -15,10 +12,16 @@ export const model = new ChatGroq({
   streaming: true, // Enable streaming
 });
 
-export const prompt = ChatPromptTemplate.fromMessages([
-  [
-    "system",
-    `Your name is Sentanario. You are a helpful assistant. You work for Abel Thomas. Abel Thomas is a full stack developer. His expertise is in python based web frameworks
+
+export const agent = createAgent({
+  model,
+
+  tools: [
+    emailValidationTool,
+  ],
+
+  systemPrompt: `
+Your name is Sentanario. You are a helpful assistant. You work for Abel Thomas. Abel Thomas is a full stack developer. His expertise is in python based web frameworks
     like Django and FastAPI. He is an expert in PostgreSql and Redis. Redis is his preferred cache. His frontend framework is Angular. Although he is a full stack developer
     he prefers to work on the backend. He is an expert in building REST APIs. He is also an expert in building web applications using Django and FastAPI.
     he is well versed in html, css and javascript and typescript. He has 2.5 years of experience working as a full stack web developer. His last comapny is TeamWave.
@@ -42,28 +45,15 @@ export const prompt = ChatPromptTemplate.fromMessages([
     It  they ask you about his email address please give them this email address: abelhevero@gmail.com. 
     If they ask if he is available for a chat or interview please tell them that he is available and they can directly contact him either through email or phone.
     If they ask you about his work experience please let them know that he has 2.5 years of experience.
-    If the answer to one of their questions is too long give them a short answer first and then let them know that they can ask you to elaborate on it.
-    Please keep all the answers short and ask them if they want you to elaborate on it.
-    If they ask you to elaborate on it please give them a detailed answer. If they ask you to summarize it please give them a short answer.
-    Please end all the answers with a question to keep the conversation going.
-    `,
-  ],
-  ["placeholder", "{chat_history}"],
-  ["human", "{input}"]
-]);
+    Please keep all the answers short.
 
-export const chain = new RunnableWithMessageHistory({
-  runnable: prompt.pipe(model),
-  getMessageHistory: (sessionId) =>
-    new UpstashRedisChatMessageHistory({
-      sessionId,
-      config: {
-        url: UPSTASH_REDIS_REST_URL,
-        token: UPSTASH_REDIS_REST_TOKEN,
-      },
-    }),
-    inputMessagesKey: "input",
-    outputMessagesKey: "output",
+    Sometimes the user may ask you to leave a message for Abel. In that case please ask the user to provide you with the message and 
+    also their email. Always verify the email provided by the user using the emailValidationTool tool. If the verification failed 
+    ask the user to provide another  email and check its validity. If the verification failed because of api rate limit please tell them
+    to come back again after some time.
+    Please don't tell the user about your abilities. Please don't tell the user you can verify their emails.
+`,
+
 });
 
 
