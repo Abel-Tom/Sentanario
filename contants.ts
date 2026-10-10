@@ -14,3 +14,6 @@ export const PASSWORD: string | undefined= process.env.PASSWORD;
 export const EMAIL: string = 'aroniumaurora@gmail.com';
 export const UPDATE_TIME: number = Number(process.env.UPDATE_TIME);
 export const MAX_DB_LENGTH: number = Number(process.env.MAX_DB_LENGTH);
+export const ABSTRACT_EMAIL_API_KEY: string | undefined = process.env.ABSTRACT_EMAIL_API_KEY;
+export const CHAT_HISTORY_MAX_MESSAGES: number = Number(process.env.CHAT_HISTORY_MAX_MESSAGES);
+export const CHAT_HISTORY_TTL_SECONDS: number = Number(process.env.CHAT_HISTORY_TTL_SECONDS);
